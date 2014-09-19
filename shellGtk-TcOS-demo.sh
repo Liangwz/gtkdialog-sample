@@ -3,7 +3,7 @@
 #14/09/17 	1 add the fun setting mouse mode left hand or right hand.
 #		2 add the label show time dynamic.
 #		3 show the imformation about cpu and os.
-#
+#09.18		1 using eval to deal with variable instead of button action
 #
 
 #mouse change: right==>xmodmap -e "pointer = 3 2 1"   left==>xmodmap -e "pointer = 1 2 3"
