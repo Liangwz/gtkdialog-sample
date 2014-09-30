@@ -35,7 +35,12 @@ export _CONF_NUMLOCK_IF_ENABLE="enable"
 
 #HOSTNAME            LOCALEVAL        TIMEZONEVAL	UTCABL	KEYBOARLANGUAGEDVAL NUMLOCKVAL
 
+## ----------------------------------------------------------------------------
+## Local Functions
+## ----------------------------------------------------------------------------
 
+## Enable the embedding of comments within the XML.
+Comment() { :; }
 
 functimeShow(){			
 	echo '<variable>nowtime</variable>
@@ -88,10 +93,32 @@ funcmenuCreate() {
 	</vbox>'
 }
 
+funcexpander(){
+
+	echo '		<expander expanded="false" use-underline="true">
+			<vbox>
+				<hbox>
+					<checkbox  active="false">
+					<label>Using UTC</label>
+					<variable>_CONF_UTC_IF_ENABLE</variable>
+					</checkbox>					
+				</hbox>
+				<hbox>
+					<checkbox>
+					<label>NumLock</label>
+					<variable>_CONF_NUMLOCK_IF_ENABLE</variable>
+					</checkbox>
+				</hbox>
+			</vbox>
+			<label>e_xpander</label>
+			<variable>exp0</variable>
+		</expander>'
+}
+
 
 export VIEW_MESSAGE_DIALOG='
 
-<window title="DETAIL MESSAGE" icon-name="gtk-about" resizable="true" width-request="600" height-request="550" > 
+<window title="DETAIL MESSAGE" icon-name="gtk-about" resizable="true" width-request="800" height-request="750" > 
 	<vbox>
 		<hbox space-fill="true" auto-refresh="true">
 			<text><label> Aim for Thin OS!  </label></text>
@@ -106,10 +133,18 @@ export MAIN_DIALOG='
 <window title="Thin Kiosk" icon-name="gtk-about" resizable="true" width-request="600" height-request="550"> 
 
 <vbox> 
-	<hbox>
+'`Comment ##
+##the comment test
+`'
 		<vbox>
 			'"`funcmenuCreate`"'
-		</vbox>		
+		</vbox>	
+		<vbox>
+			'"`funcexpander`"'
+		</vbox>	
+
+	<hbox>
+	
 		<frame>
 
 			<hbox> 
@@ -166,14 +201,6 @@ export MAIN_DIALOG='
 							
 				</comboboxtext>
 			</hbox>
-
-			<hbox>
-			<checkbox>
-			<label>Using UTC</label>
-			<variable>_CONF_UTC_IF_ENABLE</variable>
-			</checkbox>
-			</hbox>	
-
 		
 			<hbox>
 				<text><label> Keybord Language </label></text>
@@ -183,12 +210,7 @@ export MAIN_DIALOG='
 					<item>CHINA</item>
 				</comboboxtext>
 			</hbox>
-			<hbox>
-			<checkbox>
-				<label>NumLock</label>
-				<variable>_CONF_NUMLOCK_IF_ENABLE</variable>
-				</checkbox>
-				</hbox>
+
 			<hbox>
 				<text><label> NumLock </label></text>
 				<combobox>
