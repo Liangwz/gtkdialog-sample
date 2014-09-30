@@ -5,7 +5,11 @@
 #		3 show the imformation about cpu and os.
 #09.18		1 using eval to deal with variable instead of button action
 #09.19		1 add widget checkbox
+<<<<<<< HEAD
 #0928		1 add widget imagebut & menubar
+=======
+#home-pc
+>>>>>>> 0cf8bc73100f38306123f99431f1a83922b9319d
 
 #mouse change: right==>xmodmap -e "pointer = 3 2 1"   left==>xmodmap -e "pointer = 1 2 3"
 GTKDIALOG=gtkdialog 
