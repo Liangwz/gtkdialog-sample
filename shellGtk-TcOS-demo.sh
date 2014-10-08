@@ -5,18 +5,21 @@
 #		3 show the imformation about cpu and os.
 #09.18		1 using eval to deal with variable instead of button action
 #09.19		1 add widget checkbox
-<<<<<<< HEAD
 #0928		1 add widget imagebut & menubar
-=======
 #home-pc
->>>>>>> 0cf8bc73100f38306123f99431f1a83922b9319d
+#1008		1 add widget vscale.
+#		2 finish the volume change for PCM && done the mouse type change.
 
 #mouse change: right==>xmodmap -e "pointer = 3 2 1"   left==>xmodmap -e "pointer = 1 2 3"
 GTKDIALOG=gtkdialog 
 
+##amixer get PCM | grep " \[" | head -1|cut -d [ -f 2|cut -d % -f 1   ##get the voluma value
+export VOLUME_SET="amixer set PCM "
+export VOLUME_SET_50="amixer set PCM 50%"
 export MOUSE_LEFT="xmodmap -e \"pointer = 1 2 3\""
 export MOUSE_RIGHT="xmodmap -e \"pointer = 3 2 1\""
 export CPUVAL=`cat /proc/cpuinfo |grep "model name"|cut -f2 -d:`
+export _VOLUME_VALUE=`amixer get PCM | grep " \[" | head -1|cut -d [ -f 2|cut -d % -f 1`
 #export CPUVAL="intell E5500"
 export OS=`uname -s`
 export _GTKDIALOG="gtkdialog"
@@ -37,6 +40,8 @@ export _CONF_UTC_IF_ENABLE="noset"
 export _CONF_KEYBOARD_LAYOUT="USA"
 export _CONF_NUMLOCK_IF_ENABLE="enable"
 
+
+echo $_VOLUME_VALUE
 #HOSTNAME            LOCALEVAL        TIMEZONEVAL	UTCABL	KEYBOARLANGUAGEDVAL NUMLOCKVAL
 
 ## ----------------------------------------------------------------------------
@@ -45,6 +50,33 @@ export _CONF_NUMLOCK_IF_ENABLE="enable"
 
 ## Enable the embedding of comments within the XML.
 Comment() { :; }
+
+##			<action>bash -c echo $_VOLUME_VALUE</action>
+##add vscale widget 
+funcscaType0Create() {
+	echo '<'$2'scale width-request="'$3'" height-request="'$4'" range-value="'${_VOLUME_VALUE}'">
+			<variable>_VOLUME_VALUE</variable>
+		</'$2'scale>
+		<'$2'separator></'$2'separator>'
+}
+#funcscaType0Create() {
+#	echo '<'$2'scale width-request="'$3'" height-request="'$4'" range-value="4">
+#			<variable>'$1'</variable>
+#			<action>echo "'$1' changed to $'$1'"</action>
+#		</'$2'scale>
+#		<'$2'separator></'$2'separator>'
+#}
+##SHELL COMMAND EXECUTE
+execute ()
+{
+	$* >/dev/null
+	if [ $? -ne 0 ]; then
+		echo
+		echo "ERROR: executing $*"
+		echo
+		exit 1
+	fi
+}
 
 functimeShow(){			
 	echo '<variable>nowtime</variable>
@@ -156,8 +188,15 @@ export MAIN_DIALOG='
 			</hbox> 
 			<hbox> 
 				<text><label> OS:'"${OS}"' </label></text>
-			</hbox> 			
-		
+			</hbox> 
+'`Comment ##
+##the comment test	
+##
+##
+`'
+			<hbox>
+				'"`funcscaType0Create vscVScale0 v 50 50`"'
+			</hbox>		
 			<hbox>
 				<text><label> Mouse </label></text>
 				<comboboxtext>
@@ -165,7 +204,7 @@ export MAIN_DIALOG='
 					<item>Left Hand</item>
 					<item>Right Hand</item>
 					<action>echo "$MOUSETYPE"</action>
-					<action>echo hello</action>
+					<action>echo "hello"</action>
 				</comboboxtext>
 			</hbox>
 			
@@ -237,7 +276,7 @@ export MAIN_DIALOG='
 		 
 			<hbox> 
 		      		<button cancel></button>
-		      		<button ok></button>
+				<button ok></button>				
 			</hbox> 
 		
 		
@@ -277,8 +316,40 @@ eval `$GTKDIALOG --program=MAIN_DIALOG --center`
 
 echo ${_CONF_HOSTNAME}
 echo ${_CONF_MOUSE_TYPE}
+if [ "${_CONF_MOUSE_TYPE}" == "Left Hand" ]; then
+	echo "show left hand"
+	echo $MOUSE_LEFT
+#	execute $MOUSE_LEFT
+	sudo xmodmap -e "pointer = 1 2 3"
+
+elif [ "${_CONF_MOUSE_TYPE}" == "Right Hand" ]; then
+	echo "show ${_CONF_MOUSE_TYPE}"
+	execute $MOUSE_RIGHT
+else
+	echo "unknow :${_CONF_MOUSE_TYPE} "
+fi
+
 echo ${_CONF_LANGUAGE_LOCALE}
 echo ${_CONF_TIME_ZONE}
+case ${_CONF_TIME_ZONE} in
+	"china"|"CHINA")
+	echo "${_CONF_TIME_ZONE}!"
+	;;
+	"America"|"USA")
+	echo "${_CONF_TIME_ZONE}!"
+	;;
+	*)
+	echo "nothing else"
+	;;
+esac
+echo Volume ${_VOLUME_VALUE}	
+if [ ${_VOLUME_VALUE} == 101 ];then #if volume is unchange
+	echo "volume unchange."	
+else
+	echo "set volume to be ${_VOLUME_VALUE}"
+	sudo amixer set PCM ${_VOLUME_VALUE}%
+fi
+
 echo CONF_UTC ${_CONF_UTC_IF_ENABLE}
 echo ${_CONF_KEYBOARD_LAYOUT}
 echo ${_CONF_NUMLOCK_IF_ENABLE}
