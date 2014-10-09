@@ -1,0 +1,26 @@
+#clone the case
+mkdir github
+cd github
+git clone https://github.com/Liangwz/CS-sqlite.git
+
+#renew the case
+cd github/CS-sqlite
+git pull
+
+
+#modify and hand in
+cd github/CS-sqlite
+git add --all .
+git commit -m 'description about this commit'
+git push origin master 
+
+
+#rm file
+rm text.tx
+==>#1 recover 
+git checkout -- text.tx
+==>#2 remove
+git rm text.tx
+##git status
+git commit -m 'remove file'
+git push origin master

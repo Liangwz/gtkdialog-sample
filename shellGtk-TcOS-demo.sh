@@ -14,6 +14,10 @@
 GTKDIALOG=gtkdialog 
 
 ##amixer get PCM | grep " \[" | head -1|cut -d [ -f 2|cut -d % -f 1   ##get the voluma value
+export _RESOLUTION_VALUE=`xrandr | head -1 | cut -d ' ' -f 8-10|sed 's/,//g' | sed 's/ //g'`
+export _SCREEN_WIDGH=`echo ${_RESOLUTION_VALUE}|cut -d 'x' -f 1`
+export _SCREEN_HEIGHT=`echo ${_RESOLUTION_VALUE}|cut -d 'x' -f 2`
+export _RESOLUTION_SET="xrandr -s 1280x768"
 export VOLUME_SET="amixer set PCM "
 export VOLUME_SET_50="amixer set PCM 50%"
 export MOUSE_LEFT="xmodmap -e \"pointer = 1 2 3\""
@@ -39,9 +43,19 @@ export _CONF_TIME_ZONE="USA"
 export _CONF_UTC_IF_ENABLE="noset"
 export _CONF_KEYBOARD_LAYOUT="USA"
 export _CONF_NUMLOCK_IF_ENABLE="enable"
+export _CONF_RESOLUTION="800*600"
 
 
 echo $_VOLUME_VALUE
+echo ${_RESOLUTION_VALUE}
+echo ${_SCREEN_WIDGH}
+echo ${_SCREEN_HEIGHT}
+
+if [ ${_SCREEN_WIDGH} == "0" ];then
+	_SCREEN_WIDGH=800
+	_SCREEN_HEIGHT=600
+fi
+
 #HOSTNAME            LOCALEVAL        TIMEZONEVAL	UTCABL	KEYBOARLANGUAGEDVAL NUMLOCKVAL
 
 ## ----------------------------------------------------------------------------
@@ -51,7 +65,7 @@ echo $_VOLUME_VALUE
 ## Enable the embedding of comments within the XML.
 Comment() { :; }
 
-##			<action>bash -c echo $_VOLUME_VALUE</action>
+
 ##add vscale widget 
 funcscaType0Create() {
 	echo '<'$2'scale width-request="'$3'" height-request="'$4'" range-value="'${_VOLUME_VALUE}'">
@@ -117,7 +131,7 @@ funcmenuCreate() {
 			<menu label="_Other" use-underline="true">
 				<menuitem stock-id="gtk-home" label="Stock Icon"></menuitem>
 				<menuitemseparator></menuitemseparator>
-				<menu image-name="'"$IMAGEFILE"'" label="Image from File">
+				<menu image-name="'"${IMAGEFILE}"'" label="Image from File">
 					<menu icon-name="gimp" label="Theme Icon">
 						<menuitem label="Label Only"></menuitem>
 					</menu>
@@ -164,9 +178,11 @@ export VIEW_MESSAGE_DIALOG='
 </window>
 '
 echo ${CPUVAL}
-export MAIN_DIALOG=' 
+##remove the window biger smaller and close optional --> decorated="false"
 
-<window title="Thin Kiosk" icon-name="gtk-about" resizable="true" width-request="600" height-request="550"> 
+
+export MAIN_DIALOG=' 
+<window title="Thin Kiosk" icon-name="gtk-about" resizable="true" width-request="'${_SCREEN_WIDGH}'" height-request="'${_SCREEN_HEIGHT}'"> 
 
 <vbox> 
 '`Comment ##
@@ -180,7 +196,7 @@ export MAIN_DIALOG='
 		</vbox>	
 
 	<hbox>
-	
+<notebook labels="Checkbox|Radiobutton">	
 		<frame>
 
 			<hbox> 
@@ -194,16 +210,14 @@ export MAIN_DIALOG='
 ##
 ##
 `'
-			<hbox>
-				'"`funcscaType0Create vscVScale0 v 50 50`"'
-			</hbox>		
+	
 			<hbox>
 				<text><label> Mouse </label></text>
 				<comboboxtext>
 					<variable>_CONF_MOUSE_TYPE</variable>
 					<item>Left Hand</item>
 					<item>Right Hand</item>
-					<action>echo "$MOUSETYPE"</action>
+					<action>echo "${MOUSETYPE}"</action>
 					<action>echo "hello"</action>
 				</comboboxtext>
 			</hbox>
@@ -263,7 +277,21 @@ export MAIN_DIALOG='
 				</combobox>
 			</hbox>
 			<hbox>
-				<text><label> Volume </label></text>
+				<text><label> Resolution '${_RESOLUTION_VALUE}'</label></text>
+				<comboboxtext>
+					<variable>_CONF_RESOLUTION</variable>
+					<item>'${_RESOLUTION_VALUE}'</item>
+					<item>800x600</item>
+					<item>1024x768</item>
+					<item>1152x864</item>			
+					<item>1280x600</item>			
+					<item>1280x720</item>	
+					<item>1280x768</item>			
+					<item>1280x800</item>				
+					<item>1440X900</item>			
+					
+							
+				</comboboxtext>
 			</hbox>
 			
 			<hbox>
@@ -294,7 +322,9 @@ export MAIN_DIALOG='
 			<hbox>
 				<text><label> Volume </label></text>
 			</hbox>
-
+			<hbox>
+				'"`funcscaType0Create vscVScale0 v 50 100`"'
+			</hbox>	
 			<hbox>
 				<text><label> Network </label></text>
 			</hbox>
@@ -303,10 +333,11 @@ export MAIN_DIALOG='
 			</hbox>
 
 		</frame>
-	
+	</notebook>
 	</hbox>
 
 </vbox> 
+<action signal="delete-event">bash -c "echo 'delete-event'>time.tx"</action>
 </window> 
 ' 
 
@@ -349,6 +380,46 @@ else
 	echo "set volume to be ${_VOLUME_VALUE}"
 	sudo amixer set PCM ${_VOLUME_VALUE}%
 fi
+
+case ${_CONF_RESOLUTION} in
+	"800x600")
+	echo "${_CONF_RESOLUTION}!"
+	sudo xrandr -s 800x600
+	;;
+	"1024x768")
+	echo "${_CONF_RESOLUTION}!"
+	sudo xrandr -s 1024x768
+	;;
+	"1152x864")
+	echo "${_CONF_RESOLUTION}!"
+	sudo xrandr -s 1152x864
+	;;
+	"1280x600")
+	echo "${_CONF_RESOLUTION}!"
+	sudo xrandr -s 1280x600
+	;;
+	"1280x720")
+	echo "${_CONF_RESOLUTION}!"
+	sudo xrandr -s 1280x720
+	;;
+	"1280x768")
+	echo "${_CONF_RESOLUTION}!"
+	sudo xrandr -s 1280x768
+	;;
+	"1280x800")
+	echo "${_CONF_RESOLUTION}!"
+	sudo xrandr -s 1280x800
+	;;
+	"1440x900")
+	echo "${_CONF_RESOLUTION}!"
+	sudo xrandr -s 1440x900
+	;;
+
+	*)
+	echo "nothing else"
+	;;
+esac
+
 
 echo CONF_UTC ${_CONF_UTC_IF_ENABLE}
 echo ${_CONF_KEYBOARD_LAYOUT}
