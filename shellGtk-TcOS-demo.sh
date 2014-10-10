@@ -9,7 +9,10 @@
 #home-pc
 #1008		1 add widget vscale.
 #		2 finish the volume change for PCM && done the mouse type change.
-
+#1010		1 create temp file instead of time.tx for time record
+#		2 add condition requirement
+#
+#
 #mouse change: right==>xmodmap -e "pointer = 3 2 1"   left==>xmodmap -e "pointer = 1 2 3"
 GTKDIALOG=gtkdialog 
 
@@ -34,6 +37,7 @@ export _WIFI_ENCRYPTION="none"
 export _WIFI_ESSID="GUEST"
 export _WIFI_KEY="password"
 
+
 IMAGEFILE="`find /usr/share/pixmaps -maxdepth 1 -type f | head -1`"
 
 export _CONF_MOUSE_TYPE="Left"
@@ -43,7 +47,7 @@ export _CONF_TIME_ZONE="USA"
 export _CONF_UTC_IF_ENABLE="noset"
 export _CONF_KEYBOARD_LAYOUT="USA"
 export _CONF_NUMLOCK_IF_ENABLE="enable"
-export _CONF_RESOLUTION="800*600"
+export _CONF_RESOLUTION="none"
 
 
 echo $_VOLUME_VALUE
@@ -55,6 +59,24 @@ if [ ${_SCREEN_WIDGH} == "0" ];then
 	_SCREEN_WIDGH=800
 	_SCREEN_HEIGHT=600
 fi
+
+
+## Get major/minor/micro version of an application.
+## On entry: $1 = command
+##           $2 = index into string to locate version
+##  On exit: Initialises major/minor/micro_versionfuncAppVersionGet "$GTKDIALOG -v" 2
+funcAppVersionGet() {
+	local field
+	local index=0
+
+	for field in `$1`; do
+		if [ $index -eq $2 ]; then break; fi; index=$((index + 1))
+	done
+	major_version=${field%%.*}; field=${field#*.}
+	minor_version=${field%%.*}
+	micro_version=${field#*.}
+}
+
 
 #HOSTNAME            LOCALEVAL        TIMEZONEVAL	UTCABL	KEYBOARLANGUAGEDVAL NUMLOCKVAL
 
@@ -95,19 +117,19 @@ execute ()
 functimeShow(){			
 	echo '<variable>nowtime</variable>
 		<action>bash -c funcgetTime</action>	
-		<action type="refresh">time.tx</action>							
+		<action type="refresh">'${TEMP_FILE_TIME}'</action>							
 		</timer>'
 
 	echo '<text>
-		<variable export="false">time.tx</variable>
-  		<input file>time.tx</input>
-  		<input>cat time.tx</input> 
+		<variable export="false">'${TEMP_FILE_TIME}'</variable>
+  		<input file>'${TEMP_FILE_TIME}'</input>
+  		<input>cat '${TEMP_FILE_TIME}'</input> 
 	</text>'
 	
 }
 funcgetTime(){
 	NOW=`date +%x-%H:%M:%S`
-	echo $NOW > time.tx
+	echo $NOW > ${TEMP_FILE_TIME}
 }; export -f funcgetTime
 
 
@@ -166,6 +188,32 @@ funcexpander(){
 }
 
 
+
+## ----------------------------------------------------------------------------
+## Main
+## ----------------------------------------------------------------------------
+
+## Check requirements.
+if [ ! `command -v $GTKDIALOG` ]; then
+	echo "Couldn't find $GTKDIALOG"
+	exit 1
+fi
+funcAppVersionGet "$GTKDIALOG -v" 2
+if [ $minor_version -ge 8 -a $micro_version -ge 3 ]; then
+	true
+else
+	echo "Couldn't find $GTKDIALOG >= 0.8.3"
+	exit 1
+fi
+
+## Create a temporary file for time.
+export TEMP_FILE_TIME=`mktemp  time.XXXXXXXX`
+if [ $? -ne 0 ]; then
+	echo "Couldn't create temporary directory."
+	exit 1
+fi
+
+
 export VIEW_MESSAGE_DIALOG='
 
 <window title="DETAIL MESSAGE" icon-name="gtk-about" resizable="true" width-request="800" height-request="750" > 
@@ -198,19 +246,20 @@ export MAIN_DIALOG='
 	<hbox>
 <notebook labels="Checkbox|Radiobutton">	
 		<frame>
-
+			<frame>
 			<hbox> 
 				<text><label> '"${CPUVAL}"'</label></text>
 			</hbox> 
 			<hbox> 
 				<text><label> OS:'"${OS}"' </label></text>
 			</hbox> 
+			</frame>
 '`Comment ##
 ##the comment test	
 ##
 ##
 `'
-	
+			<frame>
 			<hbox>
 				<text><label> Mouse </label></text>
 				<comboboxtext>
@@ -221,7 +270,8 @@ export MAIN_DIALOG='
 					<action>echo "hello"</action>
 				</comboboxtext>
 			</hbox>
-			
+			</frame>
+			<frame>
 			<hbox>
 				<text><label> HostName </label></text>
 				<comboboxtext>
@@ -232,7 +282,7 @@ export MAIN_DIALOG='
 					
 				</comboboxtext>
 			</hbox>
-		
+			</frame>		
 			<hbox>
 				<text><label> Language Locale </label></text>
 				<comboboxtext>
@@ -337,7 +387,7 @@ export MAIN_DIALOG='
 	</hbox>
 
 </vbox> 
-<action signal="delete-event">bash -c "echo 'delete-event'>time.tx"</action>
+<action signal="delete-event">bash -c "echo 'delete-event'>'${TEMP_FILE_TIME}'"</action>
 </window> 
 ' 
 
@@ -424,7 +474,7 @@ esac
 echo CONF_UTC ${_CONF_UTC_IF_ENABLE}
 echo ${_CONF_KEYBOARD_LAYOUT}
 echo ${_CONF_NUMLOCK_IF_ENABLE}
-
+rm  $TEMP_FILE_TIME
 ##############method:button action###########
 #			<input file stock="gtk-yes"></input>
 #			<label>Application</label> 
