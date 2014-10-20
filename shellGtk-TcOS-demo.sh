@@ -11,15 +11,21 @@
 #		2 finish the volume change for PCM && done the mouse type change.
 #1010		1 create temp file instead of time.tx for time record
 #		2 add condition requirement
+#1017		1 remove hbox aim to let text to be centre
 #
-#
-#mouse change: right==>xmodmap -e "pointer = 3 2 1"   left==>xmodmap -e "pointer = 1 2 3"
+#mouse change: 
+
+#==>xmodmap -e "pointer = 3 2 1"   left==>xmodmap -e "pointer = 1 2 3"
 GTKDIALOG=gtkdialog 
 
 ##amixer get PCM | grep " \[" | head -1|cut -d [ -f 2|cut -d % -f 1   ##get the voluma value
 export _RESOLUTION_VALUE=`xrandr | head -1 | cut -d ' ' -f 8-10|sed 's/,//g' | sed 's/ //g'`
-export _SCREEN_WIDGH=`echo ${_RESOLUTION_VALUE}|cut -d 'x' -f 1`
-export _SCREEN_HEIGHT=`echo ${_RESOLUTION_VALUE}|cut -d 'x' -f 2`
+#export _SCREEN_WIDGH=`echo ${_RESOLUTION_VALUE}|cut -d 'x' -f 1`
+#export _SCREEN_HEIGHT=`echo ${_RESOLUTION_VALUE}|cut -d 'x' -f 2`
+
+export _SCREEN_WIDGH=800
+export _SCREEN_HEIGHT=600
+
 export _RESOLUTION_SET="xrandr -s 1280x768"
 export VOLUME_SET="amixer set PCM "
 export VOLUME_SET_50="amixer set PCM 50%"
@@ -27,7 +33,7 @@ export MOUSE_LEFT="xmodmap -e \"pointer = 1 2 3\""
 export MOUSE_RIGHT="xmodmap -e \"pointer = 3 2 1\""
 export CPUVAL=`cat /proc/cpuinfo |grep "model name"|cut -f2 -d:`
 export _VOLUME_VALUE=`amixer get PCM | grep " \[" | head -1|cut -d [ -f 2|cut -d % -f 1`
-#export CPUVAL="intell E5500"
+#export CPUVAL="intel E5500"
 export OS=`uname -s`
 export _GTKDIALOG="gtkdialog"
 #export _WIFI_NAME=`iwconfig|grep -m 1 'IEEE 802.11'|cut -d ' ' -f 1`
@@ -49,6 +55,9 @@ export _CONF_KEYBOARD_LAYOUT="USA"
 export _CONF_NUMLOCK_IF_ENABLE="enable"
 export _CONF_RESOLUTION="none"
 
+
+##setting the time variable
+export _SYS_TIME=0
 
 echo $_VOLUME_VALUE
 echo ${_RESOLUTION_VALUE}
@@ -114,23 +123,23 @@ execute ()
 	fi
 }
 
-functimeShow(){			
-	echo '<variable>nowtime</variable>
-		<action>bash -c funcgetTime</action>	
-		<action type="refresh">'${TEMP_FILE_TIME}'</action>							
-		</timer>'
-
-	echo '<text>
-		<variable export="false">'${TEMP_FILE_TIME}'</variable>
-  		<input file>'${TEMP_FILE_TIME}'</input>
-  		<input>cat '${TEMP_FILE_TIME}'</input> 
-	</text>'
-	
-}
-funcgetTime(){
-	NOW=`date +%x-%H:%M:%S`
-	echo $NOW > ${TEMP_FILE_TIME}
-}; export -f funcgetTime
+#functimeShow(){			
+#	echo '<variable>nowtime</variable>
+#		<action>bash -c funcgetTime</action>	
+#		<action type="refresh">'${TEMP_FILE_TIME}'</a#ction>							
+#		</timer>'
+#
+#	echo '<text>
+#		<variable export="false">'${TEMP_FILE_TIME}'</variable>
+ # 		<input file>'${TEMP_FILE_TIME}'</input>
+  #		<input>cat '${TEMP_FILE_TIME}'</input> 
+#	</text>'
+#	
+#}
+#funcgetTime(){
+#	NOW=`date +%x-%H:%M:%S`
+#	echo $NOW > ${TEMP_FILE_TIME}
+#}; export -f funcgetTime
 
 
 funcimagebtnCreate() {
@@ -189,6 +198,32 @@ funcexpander(){
 
 
 
+funcpixCreate() {
+	for f in 0 1; do
+		echo '<pixmap>
+				<variable export="false">pix'$1$f'</variable>
+				<input file>/home/git/gtkdialog-sample/pix'$f'.svg</input>
+			</pixmap>'
+	done
+}
+
+
+functmrCreate() {
+	echo '<variable>tmr'$1'</variable>
+			<action>refresh:pix'$1'0</action>
+			<action>refresh:pix'$1'1</action>
+		</timer>'
+}
+
+funcpixRandomise() {
+	local rand=
+	for f in 0 1 2 3; do
+		rand=$(($RANDOM % 4))
+		ln -sf "$TMPDIR"/image$rand.svg "$TMPDIR"/pix$f.svg
+	done
+}; export -f funcpixRandomise
+
+
 ## ----------------------------------------------------------------------------
 ## Main
 ## ----------------------------------------------------------------------------
@@ -227,39 +262,63 @@ export VIEW_MESSAGE_DIALOG='
 '
 echo ${CPUVAL}
 ##remove the window biger smaller and close optional --> decorated="false"
-
+# width-request="'${_SCREEN_WIDGH}'" height-request="'${_SCREEN_HEIGHT}'"
 
 export MAIN_DIALOG=' 
-<window title="Thin Kiosk" icon-name="gtk-about" resizable="true" width-request="'${_SCREEN_WIDGH}'" height-request="'${_SCREEN_HEIGHT}'"> 
+<window title="Thin Kiosk" icon-name="gtk-about" resizable="true"> 
 
-<vbox> 
 '`Comment ##
 ##the comment test
 `'
+
+<vbox space-expand="true" space-fill="true"> 
+
+
+
+	<vbox>
+		<pixmap>
+				<input file>/home/git/gtkdialog-sample/pix1.svg</input>
+		</pixmap>
+		<text>
+		<variable>_SYS_TIME</variable>
+		<input>date +%c</input>
+		</text>
+		<timer visible="false">
+		<action type="refresh">_SYS_TIME</action>
+		</timer>
+	</vbox>
+
+
+		<vbox>
+		
+			<text>
+				<variable>_SYS_TIME</variable>
+				<input>date +%c</input>
+		
+			</text>
+			<timer visible="false">
+				<action type="refresh">_SYS_TIME</action>
+			</timer>
+		</vbox>
 		<vbox>
 			'"`funcmenuCreate`"'
 		</vbox>	
 		<vbox>
-			'"`funcexpander`"'
+			'"`funcexpander`"'		
 		</vbox>	
 
-	<hbox>
-<notebook labels="Checkbox|Radiobutton">	
-		<frame>
-			<frame>
-			<hbox> 
-				<text><label> '"${CPUVAL}"'</label></text>
-			</hbox> 
-			<hbox> 
-				<text><label> OS:'"${OS}"' </label></text>
-			</hbox> 
-			</frame>
+
+	<hbox   space-expand="true" space-fill="true">
+<notebook labels="conf-one|conf-two"  space-expand="true" space-fill="true">	
+		<frame>		 
+			<text><label> '"${CPUVAL}"'</label></text>			
+			<text><label> OS:'"${OS}"' </label></text>		
 '`Comment ##
 ##the comment test	
 ##
 ##
 `'
-			<frame>
+			
 			<hbox>
 				<text><label> Mouse </label></text>
 				<comboboxtext>
@@ -270,7 +329,7 @@ export MAIN_DIALOG='
 					<action>echo "hello"</action>
 				</comboboxtext>
 			</hbox>
-			</frame>
+			
 			<frame>
 			<hbox>
 				<text><label> HostName </label></text>
@@ -363,10 +422,7 @@ export MAIN_DIALOG='
 			<hbox>
 				'"`funcimagebtnCreate 0 true gtk-print`"'
 			</hbox>
-			<hbox>
-				<timer interval="1">
-				'"`functimeShow`"'	
-			</hbox>
+
 		</frame>
 		<frame>
 			<hbox>
@@ -434,35 +490,35 @@ fi
 case ${_CONF_RESOLUTION} in
 	"800x600")
 	echo "${_CONF_RESOLUTION}!"
-	sudo xrandr -s 800x600
+	sudo xrandr -s ${_CONF_RESOLUTION}
 	;;
 	"1024x768")
 	echo "${_CONF_RESOLUTION}!"
-	sudo xrandr -s 1024x768
+	sudo xrandr -s ${_CONF_RESOLUTION}
 	;;
 	"1152x864")
 	echo "${_CONF_RESOLUTION}!"
-	sudo xrandr -s 1152x864
+	sudo xrandr -s ${_CONF_RESOLUTION}
 	;;
 	"1280x600")
 	echo "${_CONF_RESOLUTION}!"
-	sudo xrandr -s 1280x600
+	sudo xrandr -s ${_CONF_RESOLUTION}
 	;;
 	"1280x720")
 	echo "${_CONF_RESOLUTION}!"
-	sudo xrandr -s 1280x720
+	sudo xrandr -s ${_CONF_RESOLUTION}
 	;;
 	"1280x768")
 	echo "${_CONF_RESOLUTION}!"
-	sudo xrandr -s 1280x768
+	sudo xrandr -s ${_CONF_RESOLUTION}
 	;;
 	"1280x800")
 	echo "${_CONF_RESOLUTION}!"
-	sudo xrandr -s 1280x800
+	sudo xrandr -s ${_CONF_RESOLUTION}
 	;;
 	"1440x900")
 	echo "${_CONF_RESOLUTION}!"
-	sudo xrandr -s 1440x900
+	sudo xrandr -s ${_CONF_RESOLUTION}
 	;;
 
 	*)
