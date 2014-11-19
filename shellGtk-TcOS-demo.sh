@@ -12,7 +12,7 @@
 #1010		1 create temp file instead of time.tx for time record
 #		2 add condition requirement
 #1017		1 remove hbox aim to let text to be centre
-#
+#1119
 #mouse change: 
 
 #==>xmodmap -e "pointer = 3 2 1"   left==>xmodmap -e "pointer = 1 2 3"

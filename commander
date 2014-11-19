@@ -14,6 +14,19 @@ git add --all .
 git commit -m 'description about this commit'
 git push origin master 
 
+#return to pre version
+1 show log
+#git log              (q to return)
+2 return pre version
+#git reset --hard HEAD^    (pre second ==>HEAD^^ pre 100 ==>HEAD~100)
+sumary:
+To where#git reset --hard commit_id
+To past#git log
+
+To future#git reflog
+
+
+
 
 #rm file
 rm text.tx
