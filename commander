@@ -15,17 +15,25 @@ git commit -m 'description about this commit'
 git push origin master 
 
 #return to pre version
-1 show log
+	1 show log
 #git log              (q to return)
-2 return pre version
+	2 return pre version
 #git reset --hard HEAD^    (pre second ==>HEAD^^ pre 100 ==>HEAD~100)
 sumary:
 To where#git reset --hard commit_id
 To past#git log
-
 To future#git reflog
 
-
+#Team work
+	a. fork
+	b. clone
+#git init
+#git clone git@github.com:Liangwz/thintron.git
+	c. change commit
+git add *
+git commit -m "fork test"
+git push origin master
+	d. https://www.zybuluo.com/plantpark/note/24419	
 
 
 #rm file
